@@ -1,0 +1,40 @@
+name: Daily NFL Player JSON Update
+
+# Schedule: daily at 6:00 AM UTC
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:  # allows manual trigger if needed
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # 3. Install dependencies (update if your script uses more)
+      - name: Install dependencies
+        run: |
+          pip install pandas requests
+
+      # 4. Run the JSON generator script
+      - name: Generate NFL player JSON
+        run: python scripts/generate_players_json.py
+
+      # 5. Commit and push updated JSON
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add nflfastR_players.json
+          git commit -m "Daily NFL player JSON update" || echo "No changes to commit"
+          git push
